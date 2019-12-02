@@ -1,0 +1,8 @@
+S lib
+S src
+
+B _build/lib
+B _build/src
+
+PKG core
+PKG ppx_jane
