@@ -54,29 +54,38 @@ end
 
 module Grid = struct
   module PointMap = Map.Make (Point)
-  type t = Int.Set.t PointMap.t
+
+  type t = int Int.Map.t PointMap.t
 
   let empty: t = PointMap.empty
 
-  let rec trace_steps id grid start steps =
-    let add_id set_opt =
-      let set = Option.value ~default:Int.Set.empty set_opt in
-      Some (Int.Set.add set id)
+  let trace_steps id grid steps =
+    let add_len len map_opt =
+      let map = Option.value ~default:Int.Map.empty map_opt in
+      Some
+        (Map.change map id ~f:(
+          fun len_opt ->
+            if Option.is_none len_opt
+            then Some len
+            else len_opt
+        ))
     in
-    match steps with
-    | [] -> grid
-    | step :: steps ->
-      let points = PointList.of_step start step in
-      let start = List.hd_exn points in
-      let grid = List.fold points ~init:grid ~f:(Map.change ~f:add_id) in
-      trace_steps id grid start steps
+    let rec trace_steps' grid start steps len =
+      match steps with
+      | [] -> grid
+      | step :: steps ->
+        let points = PointList.of_step start step in
+        let start = List.hd_exn points in
+        let len = len + List.length points in
+        let grid = List.foldi points ~init:grid
+          ~f:(fun i -> Map.change ~f:(add_len (len - (i + 1))))
+        in
+        trace_steps' grid start steps len
+    in
+    trace_steps' grid Point.origin steps 1
 
   let intersections grid =
-    Map.fold grid ~init:(Set.empty (module Point))
-      ~f:(fun ~key ~data accum ->
-            if Set.length data >= 2
-            then Set.add accum key
-            else accum)
+    Map.filter grid ~f:(fun traversals -> Map.length traversals >= 2)
 end
 
 let parse_line line =
@@ -87,15 +96,28 @@ let parse_file file =
   In_channel.input_lines file
   |> List.map ~f:parse_line
 
+let trace_paths file =
+  parse_file file
+  |> List.foldi ~init:Grid.empty
+      ~f:(fun id grid steps -> Grid.trace_steps id grid steps)
+
 let part1 file =
-  let grid =
-    parse_file file
-    |> List.foldi ~init:Grid.empty
-        ~f:(fun id grid steps -> Grid.trace_steps id grid Point.origin steps)
-  in
+  let grid = trace_paths file in
   let intersections = Grid.intersections grid in
-  Set.to_list intersections
+  Map.keys intersections
   |> List.map ~f:(Point.manhattan_dist Point.origin)
+  |> List.min_elt ~compare:Int.compare
+  |> Option.value_exn
+  |> string_of_int
+
+let part2 file =
+  let grid = trace_paths file in
+  let intersections = Grid.intersections grid in
+  let sum_lengths traversals =
+    Map.fold traversals ~init:0 ~f:(fun ~key ~data sum -> sum + data)
+  in
+  Map.map intersections ~f:sum_lengths
+  |> Map.data
   |> List.min_elt ~compare:Int.compare
   |> Option.value_exn
   |> string_of_int
