@@ -3,6 +3,7 @@ open Core
 let calendar = Map.of_alist_exn (module Int)
     [(1, ("data/day1.txt", [Day1.part1; Day1.part2]))
     ;(2, ("data/day2.txt", [Day2.part1; Day2.part2]))
+    ;(3, ("data/day3.txt", [Day3.part1]))
     ]
 
 let () =
