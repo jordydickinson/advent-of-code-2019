@@ -28,11 +28,12 @@ let run_program memory arg1 arg2 =
   in
   run_program' 0
 
-let part1 file = string_of_int @@
+let part1 file =
   let memory = parse_program file in
   run_program memory 12 2
+  |> printf "%d\n"
 
-let part2 file = string_of_int @@
+let part2 file =
   let memory = parse_program file in
   let rec part2' noun verb =
     if run_program memory noun verb = 19690720 then
@@ -43,3 +44,4 @@ let part2 file = string_of_int @@
       part2' noun (verb + 1)
   in
   part2' 0 0 
+  |> printf "%d\n"

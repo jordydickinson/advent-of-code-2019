@@ -1,12 +1,13 @@
 open Core
 
-let part1 file = string_of_int @@
+let part1 file =
   let calc_fuel fuel mass_s =
     fuel + (int_of_string mass_s) / 3 - 2
   in
   In_channel.fold_lines file ~init:0 ~f:calc_fuel
+  |> printf "%d\n"
 
-let part2 file = string_of_int @@
+let part2 file =
   let calc_fuel mass =
     let rec calc_fuel' fuel mass =
       let mass = mass / 3 - 2 in
@@ -18,3 +19,4 @@ let part2 file = string_of_int @@
   in
   In_channel.fold_lines file ~init:0
     ~f:(fun fuel mass_s -> fuel + calc_fuel (int_of_string mass_s))
+  |> printf "%d\n"

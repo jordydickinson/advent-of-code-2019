@@ -50,11 +50,11 @@ let part1 file =
   Sequence.range ~stop:`inclusive lower upper
   |> Sequence.filter ~f:is_valid
   |> Sequence.length
-  |> string_of_int
+  |> printf "%d\n"
 
 let part2 file =
   let lower, upper = bounds_of_file file in
   Sequence.range ~stop:`inclusive lower upper
   |> Sequence.filter ~f:is_valid2
   |> Sequence.length
-  |> string_of_int
+  |> printf "%d\n"

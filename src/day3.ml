@@ -108,7 +108,7 @@ let part1 file =
   |> List.map ~f:(Point.manhattan_dist Point.origin)
   |> List.min_elt ~compare:Int.compare
   |> Option.value_exn
-  |> string_of_int
+  |> printf "%d\n"
 
 let part2 file =
   let grid = trace_paths file in
@@ -120,4 +120,4 @@ let part2 file =
   |> Map.data
   |> List.min_elt ~compare:Int.compare
   |> Option.value_exn
-  |> string_of_int
+  |> printf "%d\n"

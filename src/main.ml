@@ -24,8 +24,9 @@ let () =
       | None ->
         eprintf "Error: No solution for day %d.\n%!" day
       | Some(input_file, soln_fns) ->
-        printf "Day %d:\n%!" day;
+        printf "=== Day %d ===\n%!" day;
         List.iteri soln_fns
-          (fun i soln_fn -> printf "  Part %d: %s\n%!" (i + 1)
-              (In_channel.with_file input_file ~f:soln_fn))
+          (fun i soln_fn ->
+            printf "* Part %d\n%!" (i + 1);
+            In_channel.with_file input_file ~f:soln_fn)
   )
