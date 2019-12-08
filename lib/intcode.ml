@@ -106,6 +106,11 @@ let recv_exn s =
   | Sending (value, resume) -> resume (), value
   | _ -> failwith "Unexpected machine state."
 
+let is_halted s =
+  match s with
+  | Halted -> true
+  | _ -> false
+
 let expect_halted_exn s =
   match s with
   | Halted -> ()
