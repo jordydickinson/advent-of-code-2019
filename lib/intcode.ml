@@ -45,10 +45,10 @@ let read_op mem pos =
   | 99 -> HALT
   | _ -> failwithf "Invalid opcode %d at address %d" opcode pos ()
 
-type interrupt =
-  | Input of (int -> interrupt)
-  | Output of int * (unit -> interrupt)
-  | Halt
+type state =
+  | Receiving of (int -> state)
+  | Sending of int * (unit -> state)
+  | Halted
 
 let exec mem =
   let mem = Array.copy mem in
@@ -65,9 +65,9 @@ let exec mem =
       write_exn out (value in1 * value in2);
       jmp (ip + 4)
     | INPUT out ->
-      Input (fun in1 -> write_exn out in1; jmp (ip + 2))
+      Receiving (fun in1 -> write_exn out in1; jmp (ip + 2))
     | OUTPUT in1 ->
-      Output (value in1, fun () -> jmp (ip + 2))
+      Sending (value in1, fun () -> jmp (ip + 2))
     | JNZ (test, dest) ->
       if value test <> 0
       then jmp (value dest)
@@ -86,7 +86,7 @@ let exec mem =
       then write_exn out 1
       else write_exn out 0;
       jmp (ip + 4)
-    | HALT -> Halt
+    | HALT -> Halted
   in
   jmp 0
 
@@ -95,3 +95,23 @@ let load file =
   |> String.strip
   |> String.split ~on:','
   |> Array.of_list_map ~f:int_of_string
+
+let send_exn s ~input =
+  match s with
+  | Receiving resume_with -> resume_with input
+  | _ -> failwith "Unexpected machine state."
+
+let recv_exn s =
+  match s with
+  | Sending (value, resume) -> resume (), value
+  | _ -> failwith "Unexpected machine state."
+
+let expect_halted_exn s =
+  match s with
+  | Halted -> ()
+  | _ -> failwith "Unexpected machine state."
+
+let returns_exn s =
+  let s, value = recv_exn s in
+  expect_halted_exn s;
+  value
