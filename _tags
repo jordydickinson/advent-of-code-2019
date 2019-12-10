@@ -1,4 +1,5 @@
 true:   package(core)
 true:   package(ppx_jane)
+true:   package(bignum)
 true:   bin_annot
 true:   thread
