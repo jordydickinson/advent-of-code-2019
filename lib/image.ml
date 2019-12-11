@@ -17,8 +17,28 @@ type t = pixel array array
 let create width height init =
   Array.make_matrix height width init
 
-let set_pixel image x y color =
-  image.(y).(x) <- color
+let copy image =
+  Array.init (Array.length image) (
+    fun y -> Array.copy image.(y)
+  )
+
+let width image = Array.length image.(0)
+
+let height image = Array.length image
+
+let set_pixel image x y pixel =
+  image.(y).(x) <- pixel
+
+let draw_pixel image x y pixel =
+  if not @@ [%equal: pixel] pixel Transparent
+  then set_pixel image x y pixel
+
+let draw_image dest src =
+  Array.iteri src (
+    fun y -> Array.iteri ~f:(
+      fun x srcpixel -> draw_pixel dest x y srcpixel
+    )
+  )
 
 let print image =
   Array.iter image (
