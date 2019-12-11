@@ -26,6 +26,10 @@ let width image = Array.length image.(0)
 
 let height image = Array.length image
 
+let to_array image = copy image
+
+let to_array_nocopy image = image
+
 let set_pixel image x y pixel =
   image.(y).(x) <- pixel
 

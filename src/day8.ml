@@ -8,7 +8,9 @@ let part1 file =
     )
   in
   let layer =
-    List.min_elt sif ~compare:(
+    Sif.to_layers_nocopy sif
+    |> List.map ~f:Image.to_array_nocopy
+    |> List.min_elt ~compare:(
       fun layer1 layer2 ->
         let blacks1 = count_pixels layer1 Image.Black in
         let blacks2 = count_pixels layer2 Image.Black in

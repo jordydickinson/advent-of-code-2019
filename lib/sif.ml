@@ -37,3 +37,7 @@ let to_image sif =
   let image = Image.copy @@ List.hd_exn sif in
   List.iter sif (Image.draw_image image);
   image
+
+let to_layers sif = List.map sif ~f:Image.copy
+
+let to_layers_nocopy sif = sif
