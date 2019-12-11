@@ -1,11 +1,5 @@
 open Core
 
-module Point2d = struct
-  include Tuple.Make (Int) (Int)
-  include Tuple.Comparable (Int) (Int)
-  include Tuple.Hashable (Int) (Int)
-end
-
 type pixel =
   | Black
   | White

@@ -1,26 +1,5 @@
 open Core
 
-type position = Empty | Asteroid
-
-module Bigvec2 = struct
-  include Tuple.Make (Bignum) (Bignum)
-  include Tuple.Comparable (Bignum) (Bignum)
-  include Tuple.Hashable (Bignum) (Bignum)
-
-  let norm (x, y) =
-    Bignum.(abs x + abs y)
-
-  let normalize (x, y) =
-    let norm = norm (x, y) in
-    Bignum.(x / norm, y / norm)
-
-  let angle (x, y) =
-    let angle = Float.atan2 (Bignum.to_float y) (Bignum.to_float x) in
-    if Float.(angle < -pi / 2.0)
-    then Float.(angle + pi*2.0)
-    else angle
-end
-
 let read_asteroids file =
   let parse_line line =
     line
@@ -38,24 +17,24 @@ let read_asteroids file =
   |> List.concat_mapi ~f:(
     fun y line ->
       parse_line line
-      |> List.map ~f:(fun x -> Bignum.(of_int x, of_int y))
+      |> List.map ~f:(fun x -> x, y)
   )
-  |> Set.of_list (module Bigvec2)
+  |> Set.of_list (module Point2d)
 
 let move_origin asteroid_map (x, y) =
   Set.remove asteroid_map (x, y)
-  |> Set.map (module Bigvec2) ~f:(fun (x', y') -> Bignum.(x' - x, y' - y))
+  |> Set.map (module Point2d) ~f:(fun (x', y') -> x' - x, y' - y)
 
 let count_visible_asteroids asteroid_map origin =
   let asteroid_map = move_origin asteroid_map origin in
-  Set.map (module Bigvec2) asteroid_map ~f:Bigvec2.normalize
+  Set.map (module Point2d) asteroid_map ~f:Point2d.taxi_normalize
   |> Set.length
 
 let vaporized_asteroids asteroids =
   let asteroids_map =
-    Set.fold asteroids ~init:(Map.empty (module Bigvec2)) ~f:(
+    Set.fold asteroids ~init:(Map.empty (module Point2d)) ~f:(
       fun map asteroid ->
-        let normalized = Bigvec2.normalize asteroid in
+        let normalized = Point2d.taxi_normalize asteroid in
         Map.update map normalized ~f:(function
           | None -> [asteroid]
           | Some asteroids -> asteroid :: asteroids
@@ -66,7 +45,13 @@ let vaporized_asteroids asteroids =
     Map.keys asteroids_map
     |> List.sort ~compare:(
       fun a1 a2 ->
-        Float.compare (Bigvec2.angle a1) (Bigvec2.angle a2)
+        let angle pt =
+          let angle = Point2d.angle pt in
+          if Float.(angle < -pi/2.0)
+          then Float.(angle + 2.0*pi)
+          else angle
+        in
+        Float.compare (angle a1) (angle a2)
     )
     |> Fqueue.of_list
   in
@@ -100,7 +85,7 @@ let part2 file =
   let asteroids = read_asteroids file in
   let (x0, y0) =
     let count_visible_asteroids = Memo.general (count_visible_asteroids asteroids) in
-    Set.fold asteroids ~init:Bignum.(zero, zero) ~f:(
+    Set.fold asteroids ~init:(0, 0) ~f:(
       fun accum asteroid ->
         if count_visible_asteroids asteroid > count_visible_asteroids accum
         then asteroid
@@ -110,6 +95,5 @@ let part2 file =
   let asteroids = move_origin asteroids (x0, y0) in
   let vaporized = vaporized_asteroids asteroids in
   List.nth_exn vaporized 199
-  |> fun (x, y) -> Bignum.((x + x0) * hundred + (y + y0))
-  |> Bignum.to_string_hum
-  |> printf "%s\n"
+  |> fun (x, y) -> (x + x0) * 100 + y + y0
+  |> printf "%d\n"
