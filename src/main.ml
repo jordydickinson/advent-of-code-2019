@@ -11,6 +11,7 @@ let calendar = Map.of_alist_exn (module Int)
     ;(8, ("data/day8.txt", [Day8.part1; Day8.part2]))
     ;(9, ("data/day9.txt", [Day9.part1; Day9.part2]))
     ;(10, ("data/day10.txt", [Day10.part1; Day10.part2]))
+    ;(11, ("data/day11.txt", [Day11.part1; Day11.part2]))
     ]
 
 let () =
