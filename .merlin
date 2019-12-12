@@ -6,4 +6,3 @@ B _build/src
 
 PKG core
 PKG ppx_jane
-PKG bignum

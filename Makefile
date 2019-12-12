@@ -3,7 +3,7 @@
 OCB_FLAGS = -use-ocamlfind -I src -I lib
 OCB = ocamlbuild $(OCB_FLAGS)
 
-PKGS = core ppx_jane bignum
+PKGS = core ppx_jane
 
 all: native byte
 
