@@ -5,9 +5,9 @@ include Tuple.Comparable (Int) (Int)
 include Tuple.Hashable (Int) (Int)
 include Tuple.Sexpable (Int) (Int)
 
-let taxi_norm (x, y) = abs x + abs y
+let norm (x, y) = abs x + abs y
 
-let taxi_normalize (x, y) =
+let normalize (x, y) =
   let rec gcd n m =
     if Int.O.(m = 0)
     then n

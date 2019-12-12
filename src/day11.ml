@@ -1,6 +1,6 @@
 open Core
 
-module Point2d = struct
+module Zvec2 = struct
   include Tuple.Make (Int) (Int)
   include Tuple.Comparable (Int) (Int)
   include Tuple.Hashable (Int) (Int)
@@ -85,10 +85,10 @@ let run_hull_painter file hull =
 
 
 let part1 file =
-  let hull = run_hull_painter file (Map.empty (module Point2d)) in
+  let hull = run_hull_painter file (Map.empty (module Zvec2)) in
   printf "%d\n" @@ Map.length hull
 
 let part2 file =
-  let hull = Map.set (Map.empty (module Point2d)) ~key:(0, 0) ~data:1 in
+  let hull = Map.set (Map.empty (module Zvec2)) ~key:(0, 0) ~data:1 in
   let hull = run_hull_painter file hull in
   Image.print @@ hull_to_image hull

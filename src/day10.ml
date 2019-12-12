@@ -19,22 +19,22 @@ let read_asteroids file =
       parse_line line
       |> List.map ~f:(fun x -> x, y)
   )
-  |> Set.of_list (module Point2d)
+  |> Set.of_list (module Zvec2)
 
 let move_origin asteroid_map (x, y) =
   Set.remove asteroid_map (x, y)
-  |> Set.map (module Point2d) ~f:(fun (x', y') -> x' - x, y' - y)
+  |> Set.map (module Zvec2) ~f:(fun (x', y') -> x' - x, y' - y)
 
 let count_visible_asteroids asteroid_map origin =
   let asteroid_map = move_origin asteroid_map origin in
-  Set.map (module Point2d) asteroid_map ~f:Point2d.taxi_normalize
+  Set.map (module Zvec2) asteroid_map ~f:Zvec2.normalize
   |> Set.length
 
 let vaporized_asteroids asteroids =
   let asteroids_map =
-    Set.fold asteroids ~init:(Map.empty (module Point2d)) ~f:(
+    Set.fold asteroids ~init:(Map.empty (module Zvec2)) ~f:(
       fun map asteroid ->
-        let normalized = Point2d.taxi_normalize asteroid in
+        let normalized = Zvec2.normalize asteroid in
         Map.update map normalized ~f:(function
           | None -> [asteroid]
           | Some asteroids -> asteroid :: asteroids
@@ -46,7 +46,7 @@ let vaporized_asteroids asteroids =
     |> List.sort ~compare:(
       fun a1 a2 ->
         let angle pt =
-          let angle = Point2d.angle pt in
+          let angle = Zvec2.angle pt in
           if Float.(angle < -pi/2.0)
           then Float.(angle + 2.0*pi)
           else angle
