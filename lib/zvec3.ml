@@ -5,7 +5,7 @@ type t =
   ; y : int
   ; z : int
   }
-[@@deriving hash, fields]
+[@@deriving equal, hash, fields]
 
 let zero = { x = 0; y = 0; z = 0 }
 

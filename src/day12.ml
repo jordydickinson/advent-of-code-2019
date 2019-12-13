@@ -4,6 +4,7 @@ type moon =
   { position : Zvec3.t 
   ; velocity : Zvec3.t
   }
+[@@deriving equal, hash]
 
 let simulate_step system =
   let apply_gravity m =
@@ -64,12 +65,12 @@ let part1 file =
 let part2 file =
   let system = input_moons file in
   let cycle_len system =
-    let rec cycle_len' prev_systems system len =
-      if Set.mem prev_systems system
+    let rec cycle_len' system' len =
+      if List.equal [%equal: moon] system system'
       then len
-      else cycle_len' (Set.add prev_systems system) (simulate_step system) (len + 1)
+      else cycle_len' (simulate_step system') (len + 1)
     in
-    cycle_len' Set.Poly.empty system 0
+    cycle_len' (simulate_step system) 1
   in
   let pseudosystem hat =
     List.map system (

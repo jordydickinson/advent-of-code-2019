@@ -1,8 +1,11 @@
+open Core
+
 type t =
   { x : int
   ; y : int
   ; z : int
   }
+[@@deriving equal, hash, fields]
 
 val zero : t
 
