@@ -149,6 +149,19 @@ let send_exn s ~input =
   | Receiving resume_with -> resume_with input
   | _ -> failwith "Unexpected machine state."
 
+let recv s =
+  match s with
+  | Sending (value, resume) -> resume (), Some value
+  | _ -> s, None
+
+let recv_many s =
+  let rec recv_many' accum s =
+    match recv s with
+    | s, None -> s, List.rev accum
+    | s, Some value -> recv_many' (value :: accum) s
+  in
+  recv_many' [] s
+
 let recv_exn s =
   match s with
   | Sending (value, resume) -> resume (), value
