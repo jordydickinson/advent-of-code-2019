@@ -3,23 +3,24 @@ open Core
 type t =
   { x : int
   ; y : int
-  ; z : int
   }
-[@@deriving equal, hash, fields]
+[@@deriving compare, sexp, hash, fields]
+
+include Comparable.S with type t := t
+
+val make : int -> int -> t
 
 val zero : t
-
 val xhat : t
 val yhat : t
-val zhat : t
 
 val map : t -> f:(int -> int) -> t
 val map2 : t -> t -> f:(int -> int -> int) -> t
 val fold : t -> init:'accum -> f:('accum -> int -> 'accum) -> 'accum
 
-(** A version of fold that doesn't take an `init` parameter and returns `int`.
-  Equivalent to `f (f (x v) (y v)) (z v)`. *)
-val fold' : t -> f:(int -> int -> int) -> int
+(** A version of fold that doesn't take an `init` parameter. Equivalent to
+  `f (x v) (y v)`. *)
+val fold' : t -> f:(int -> int -> 'accum) -> 'accum
 
 val norm : t -> int
 val neg : t -> t
@@ -27,6 +28,8 @@ val add : t -> t -> t
 val sub : t -> t -> t
 val smul : int -> t -> t
 val dot : t -> t -> int
+
+val angle : t -> float
 
 val unitize : t -> t
 

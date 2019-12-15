@@ -1,5 +1,10 @@
 open Core
 
+let rec gcd n m =
+  if m = 0
+  then n
+  else gcd m (Int.rem n m)
+
 let factorial n =
   let rec factorial' n m =
     if n = 0 then m else

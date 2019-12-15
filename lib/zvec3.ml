@@ -25,9 +25,10 @@ let map2 u v ~f =
   ; z = f u.z v.z
   }
 
-let fold v ~f = f (f v.x v.y) v.z
+let fold v ~init ~f = f (f (f init v.x) v.y) v.z
+let fold' v ~f = f (f v.x v.y) v.z
 
-let norm v = map v abs |> fold ~f:(+)
+let norm v = map v abs |> fold' ~f:(+)
 
 let neg v = map v (Int.neg)
 
@@ -37,15 +38,10 @@ let sub u v = map2 u v (-)
 
 let smul x v = map v (fun v' -> v' * x)
 
-let dot u v = map2 u v ( * ) |> fold ~f:(+)
+let dot u v = map2 u v ( * ) |> fold' ~f:(+)
 
 let unitize v =
-  let rec gcd n m =
-    if m = 0
-    then n
-    else gcd m (n%m)
-  in
-  let d = fold v gcd in
+  let d = fold' v Util.gcd in
   map v (fun v' -> v' / d)
 
 module O = struct
