@@ -29,6 +29,12 @@ val sub : t -> t -> t
 val smul : int -> t -> t
 val dot : t -> t -> int
 
+val (+) : t -> t -> t
+val (-) : t -> t -> t
+val (~-) : t -> t
+val ( * ) : int -> t -> t
+val ( *+ ) : t -> t -> int
+
 val angle : t -> float
 
 val unitize : t -> t

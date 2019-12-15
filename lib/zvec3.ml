@@ -29,25 +29,26 @@ let fold v ~init ~f = f (f (f init v.x) v.y) v.z
 let fold' v ~f = f (f v.x v.y) v.z
 
 let norm v = map v abs |> fold' ~f:(+)
-
 let neg v = map v (Int.neg)
-
 let add u v = map2 u v (+)
-
 let sub u v = map2 u v (-)
-
 let smul x v = map v (fun v' -> v' * x)
-
 let dot u v = map2 u v ( * ) |> fold' ~f:(+)
+
+let (+) = add
+let (-) = sub
+let (~-) = neg
+let ( * ) = smul
+let ( *+ ) = dot
 
 let unitize v =
   let d = fold' v Util.gcd in
   map v (fun v' -> v' / d)
 
 module O = struct
-  let (+) = add
-  let (-) = sub
-  let (~-) = neg
-  let ( * ) = smul
-  let ( *+ ) = dot
+  let (~-) = (~-)
+  let (+) = (+)
+  let (-) = (-)
+  let ( * ) = ( * )
+  let ( *+ ) = ( *+ )
 end

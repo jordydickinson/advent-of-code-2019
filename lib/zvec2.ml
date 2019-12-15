@@ -40,6 +40,12 @@ let sub u v = map2 u v (-)
 let smul x v = map v (( * ) x)
 let dot u v = map2 u v ( * ) |> fold' ~f:(+)
 
+let (~-) = neg
+let (+) = add
+let (-) = sub
+let ( * ) = smul
+let ( *+ ) = dot
+
 let angle v =
   Float.(atan2 (of_int v.x) (of_int v.y))
 
@@ -48,9 +54,9 @@ let unitize v =
   map v (fun vi -> vi/d)
 
 module O = struct
-  let (~-) = neg
-  let (+) = add
-  let (-) = sub
-  let ( * ) = smul
-  let ( *+ ) = dot
+  let (~-) = (~-)
+  let (+) = (+)
+  let (-) = (-)
+  let ( * ) = ( * )
+  let ( *+ ) = ( *+ )
 end
