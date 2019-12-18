@@ -1,18 +1,27 @@
 open Core
 
-type t
-type state
+type machine
+type error = Blocking | Halted
 
-val load : In_channel.t -> t
-val exec : t -> state
+type 'a t = machine -> 'a * machine
 
-val set : t -> int -> int -> unit
+include Monad.S2 with type ('x, 's) t := 'x t
 
-val send_exn : state -> input:int -> state
-val recv : state -> state * int option
-val recv_many : state -> state * int list
-val recv_exn : state -> state * int
-val is_halted : state -> bool
-val expect_halted_exn : state -> unit
-val returns_exn : state -> int
-val collect_exn : state -> int list
+val get : unit -> machine t
+
+val getmem : int -> unit -> int t
+val setmem : int -> int -> unit -> unit t
+
+val load : In_channel.t -> machine
+val run : 'a t -> machine -> 'a * machine
+val eval : 'a t -> machine -> 'a
+
+val write : int -> unit -> unit t
+val write_all : int list -> unit -> unit t
+val read : unit -> (int, error) result t
+val peek : unit -> (int, error) result t
+
+val is_halted : unit -> bool t
+
+val fold_read : init:('a t) -> f:('a -> int -> 'a t) -> unit -> 'a t
+val collect : f:(int -> 'a) -> unit -> 'a list t

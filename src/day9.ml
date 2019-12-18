@@ -1,19 +1,9 @@
 open Core
 
 let part1 file =
-  Intcode.(
-    load file
-    |> exec
-    |> send_exn ~input:1
-    |> collect_exn
-  )
+  Intcode.(eval (write 1 () >>= collect ~f:ident) (load file))
   |> List.iter ~f:(printf "%d\n")
 
 let part2 file =
-  Intcode.(
-    load file
-    |> exec
-    |> send_exn ~input:2
-    |> collect_exn
-  )
+  Intcode.(eval (write 2 () >>= collect ~f:ident) (load file))
   |> List.iter ~f:(printf "%d\n")

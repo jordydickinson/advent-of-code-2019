@@ -55,21 +55,18 @@ let hull_to_image hull =
   image
 
 let run_hull_painter file hull =
-  let program = Intcode.load file in
-  let rec run_robot' hull pos orientation prog =
+  let rec robot_m hull pos orientation =
+    let open Intcode.Let_syntax in
     let color =
       match Map.find hull pos with
       | None -> 0 (* Black *)
       | Some color -> color
     in
-    let prog, color =
-      Intcode.(
-        prog
-        |> send_exn ~input:color
-        |> recv_exn
-      )
-    in
-    let prog, turn = Intcode.recv_exn prog in
+    let%bind color = Intcode.write color () >>= Intcode.read in
+    if Result.is_error color then return hull else
+    let color = Result.ok color |> Option.value_exn in
+    let%bind turn = Intcode.read () in
+    let turn = Result.ok turn |> Option.value_exn in
     let hull = Map.set hull pos color in
     let orientation =
       match turn with
@@ -78,10 +75,9 @@ let run_hull_painter file hull =
       | _ -> failwithf "Invalid turn from robot: %d\n" turn ()
     in
     let pos = step_forward pos orientation in
-    if Intcode.is_halted prog then hull else
-    run_robot' hull pos orientation prog
+    robot_m hull pos orientation
   in
-  run_robot' hull (0, 0) Up (Intcode.exec program)
+  Intcode.eval (robot_m hull (0, 0) Up) (Intcode.load file)
 
 
 let part1 file =
