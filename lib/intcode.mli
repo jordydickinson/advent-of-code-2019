@@ -3,9 +3,7 @@ open Core
 type machine
 type error = Blocking | Halted
 
-type 'a t = machine -> 'a * machine
-
-include Monad.S2 with type ('x, 's) t := 'x t
+include Monad.S
 
 val get : unit -> machine t
 
@@ -19,6 +17,8 @@ val eval : 'a t -> machine -> 'a
 val write : int -> unit -> unit t
 val write_all : int list -> unit -> unit t
 val read : unit -> (int, error) result t
+val read_char : unit -> (char, error) result t
+val read_string : unit -> string t
 val peek : unit -> (int, error) result t
 
 val is_halted : unit -> bool t

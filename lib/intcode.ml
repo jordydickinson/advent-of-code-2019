@@ -202,16 +202,8 @@ let rec read () =
   | 99 -> halt ()
   | _ -> failwithf "Invalid opcode %d at address %d" opcode iptr ()
 
-let peek () =
-  let%bind s = get () in
-  let%bind x = read () in
-  set s () >>= fun () ->
-  return x
-
-let is_halted () =
-  match%map peek () with
-  | Error Halted -> true
-  | _ -> false
+let read_char () =
+  read () >>| Result.map ~f:char_of_int
 
 let fold_read ~init ~f () =
   let rec fold_m' accum m =
@@ -228,3 +220,18 @@ let collect ~f () =
   let f accum x = return (f x :: accum) in
   let%map xs_rev = fold_read ~init:(return []) ~f () in
   List.rev xs_rev
+
+let read_string () =
+  let%map chars = collect ~f:char_of_int () in
+  String.of_char_list chars
+
+let peek () =
+  let%bind s = get () in
+  let%bind x = read () in
+  set s () >>= fun () ->
+  return x
+
+let is_halted () =
+  match%map peek () with
+  | Error Halted -> true
+  | _ -> false
