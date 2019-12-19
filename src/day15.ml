@@ -1,8 +1,8 @@
 open Core
 
-let oxygen_tank_distance start machine =
-  let open Intcode.Let_syntax in
+let explore start machine =
   let move direction () =
+    let open Intcode.Let_syntax in
     let input = match direction with
     | `North -> 1
     | `South -> 2
@@ -16,20 +16,9 @@ let oxygen_tank_distance start machine =
     | Error Blocking -> failwith "Machine expects input"
     | Error Halted -> failwith "Machine halted"
   in
-  let rec explore pointmap nodes =
-    if Map.is_empty nodes then Error `NoPath else
-    let distance, node, s, nodes =
-      let distance, ns = Map.min_elt_exn nodes in
-      match ns with
-      | [] -> assert (false)
-      | (node, s) :: [] ->
-        let nodes = Map.remove nodes distance in
-        distance, node, s, nodes
-      | (node, s) :: ns ->
-        let nodes = Map.set nodes distance ns in
-        distance, node, s, nodes
-    in
-    if phys_equal (Map.find_exn pointmap node) `Goal then Ok distance else
+  let rec explore pointmap = function
+  | [] -> pointmap
+  | (node, s) :: nodes ->
     let neighbors = Zvec2.
       [ node + yhat, `North
       ; node - yhat, `South
@@ -46,19 +35,60 @@ let oxygen_tank_distance start machine =
                 | `Wall ->
                   pointmap, nodes
                 | _ ->
-                  let nodes = Map.update nodes (distance + 1)
-                    ~f:(function
-                        | None -> [node, s]
-                        | Some nodes -> (node, s) :: nodes) in
+                  let nodes = (node, s) :: nodes in
                   pointmap, nodes)
     in
     explore pointmap nodes
   in
   let pointmap = Map.of_alist_exn (module Zvec2) [start, `Floor] in
-  let nodes = Map.of_alist_exn (module Int) [0, [start, machine]] in
+  let nodes = [start, machine] in
   explore pointmap nodes
 
+let find_goal pointmap =
+  Map.to_alist pointmap
+  |> List.fold_until ~init:Zvec2.zero
+    ~f:(fun accum -> function
+      | point, `Goal -> Stop point
+      | _, `Floor -> Continue accum
+      | _, `Wall -> Continue accum)
+    ~finish:ident
+
+let distances pointmap start =
+  let rec distances explored = function
+  | [] -> explored
+  | (distance, node) :: frontier ->
+    if not @@ Map.mem pointmap node then distances explored frontier else
+    let explored = Map.set explored node distance in
+    let neighbors = Zvec2.
+      [ node + yhat
+      ; node - yhat
+      ; node - xhat
+      ; node + xhat
+      ] in
+    let frontier = List.fold neighbors ~init:frontier
+      ~f:(fun frontier neighbor ->
+          if Map.mem explored neighbor then
+            frontier
+          else if phys_equal (Map.find_exn pointmap neighbor) `Wall then
+            frontier
+          else
+            (distance + 1, neighbor) :: frontier) in
+    distances explored frontier
+  in
+  distances (Map.empty (module Zvec2)) [0, start]
+
 let part1 file =
-  match (oxygen_tank_distance Zvec2.zero Intcode.(load file)) with
-  | Ok dist -> printf "%d\n" dist
-  | Error `NoPath -> failwith "No path found"
+  let pointmap = explore Zvec2.zero Intcode.(load file) in
+  let goal = find_goal pointmap in
+  let distances = distances pointmap goal in
+  printf "%d\n" (Map.find_exn distances Zvec2.zero)
+
+let part2 file =
+  let pointmap = explore Zvec2.zero Intcode.(load file) in
+  let goal = find_goal pointmap in
+  let distances = distances pointmap goal in
+  let max_distance = Map.data distances
+    |> List.max_elt ~compare:compare
+    |> Option.value_exn
+  in
+  printf "%d\n" max_distance
