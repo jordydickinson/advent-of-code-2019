@@ -27,3 +27,23 @@ let part1 file =
     done;
   done;
   printf "%d\n" !parameter_sum
+
+let part2 file =
+  let main_routine = "A,A,B,C,C,A,B,C,A,B\n" in
+  let routine_a = "L,12,L,12,R,12\n" in
+  let routine_b = "L,8,L,8,R,12,L,8,L,8\n" in
+  let routine_c = "L,10,R,8,R,12\n" in
+  let program =
+    Intcode.(
+      setmem 0 2 () >>=
+      write_string main_routine >>=
+      write_string routine_a >>=
+      write_string routine_b >>=
+      write_string routine_c >>=
+      write_string "n\n" >>=
+      collect ~f:ident
+    )
+  in
+  Intcode.eval program (Intcode.load file)
+  |> List.last_exn
+  |> printf "%d\n"

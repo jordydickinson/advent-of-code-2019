@@ -186,6 +186,14 @@ let write_all xs () =
   let%bind s = get () in
   set { s with inputs = s.inputs @ xs } ()
 
+let write_char c () =
+  write (int_of_char c) ()
+
+let write_string s () =
+  let xs = String.to_list s
+    |> List.map ~f:int_of_char in
+  write_all xs ()
+
 let rec read () =
   let%bind iptr = getiptr () in
   let%bind opcode = getmem iptr () in
@@ -202,8 +210,17 @@ let rec read () =
   | 99 -> halt ()
   | _ -> failwithf "Invalid opcode %d at address %d" opcode iptr ()
 
+let peek () =
+  let%bind s = get () in
+  let%bind x = read () in
+  set s () >>= fun () ->
+  return x
+
 let read_char () =
   read () >>| Result.map ~f:char_of_int
+
+let peek_char () =
+  peek () >>| Result.map ~f:char_of_int
 
 let fold_read ~init ~f () =
   let rec fold_m' accum m =
@@ -224,12 +241,6 @@ let collect ~f () =
 let read_string () =
   let%map chars = collect ~f:char_of_int () in
   String.of_char_list chars
-
-let peek () =
-  let%bind s = get () in
-  let%bind x = read () in
-  set s () >>= fun () ->
-  return x
 
 let is_halted () =
   match%map peek () with

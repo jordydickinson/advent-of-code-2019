@@ -16,6 +16,8 @@ val eval : 'a t -> machine -> 'a
 
 val write : int -> unit -> unit t
 val write_all : int list -> unit -> unit t
+val write_char : char -> unit -> unit t
+val write_string : string -> unit -> unit t
 val read : unit -> (int, error) result t
 val read_char : unit -> (char, error) result t
 val read_string : unit -> string t
