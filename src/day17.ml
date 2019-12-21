@@ -1,8 +1,8 @@
 open Core
 
 let read_camera () =
-  let open Intcode.Let_syntax in
-  let%map output = Intcode.read_string () in
+  let open State.Let_syntax in
+  let%map output = Intcode.read_string in
   output
   |> String.strip
   |> String.split_lines
@@ -35,12 +35,12 @@ let part2 file =
   let routine_c = "L,10,R,8,R,12\n" in
   let program =
     Intcode.(
-      setmem 0 2 () >>=
-      write_string main_routine >>=
-      write_string routine_a >>=
-      write_string routine_b >>=
-      write_string routine_c >>=
-      write_string "n\n" >>=
+      setmem 0 2 >>
+      write_string main_routine >>
+      write_string routine_a >>
+      write_string routine_b >>
+      write_string routine_c >>
+      write_string "n\n" >>
       collect ~f:ident
     )
   in

@@ -56,16 +56,16 @@ let hull_to_image hull =
 
 let run_hull_painter file hull =
   let rec robot_m hull pos orientation =
-    let open Intcode.Let_syntax in
+    let open State.Let_syntax in
     let color =
       match Map.find hull pos with
       | None -> 0 (* Black *)
       | Some color -> color
     in
-    let%bind color = Intcode.write color () >>= Intcode.read in
+    let%bind color = Intcode.write color >> Intcode.read in
     if Result.is_error color then return hull else
     let color = Result.ok color |> Option.value_exn in
-    let%bind turn = Intcode.read () in
+    let%bind turn = Intcode.read in
     let turn = Result.ok turn |> Option.value_exn in
     let hull = Map.set hull pos color in
     let orientation =

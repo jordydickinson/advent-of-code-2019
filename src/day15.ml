@@ -1,14 +1,14 @@
 open Core
 
 let explore start machine =
-  let move direction () =
+  let move direction =
     let open Intcode.Let_syntax in
     let input = match direction with
     | `North -> 1
     | `South -> 2
     | `West -> 3
     | `East -> 4 in
-    match%map Intcode.(write input () >>= read) with
+    match%map Intcode.(write input >> read) with
     | Ok 0 -> `Wall
     | Ok 1 -> `Floor
     | Ok 2 -> `Goal
@@ -29,7 +29,7 @@ let explore start machine =
     let pointmap, nodes =
         List.fold neighbors ~init:(pointmap, nodes)
           ~f:(fun (pointmap, nodes) (node, direction) ->
-                let node_type, s = Intcode.run (move direction ()) s in
+                let node_type, s = Intcode.run (move direction) s in
                 let pointmap = Map.set pointmap node node_type in
                 match node_type with
                 | `Wall ->
