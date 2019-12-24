@@ -4,7 +4,7 @@ type t =
   { x : int
   ; y : int
   }
-[@@deriving compare, sexp, hash, fields]
+[@@deriving compare, sexp, hash, fields][@@end]
 
 include Comparable.S with type t := t
 
@@ -35,11 +35,14 @@ val (~-) : t -> t
 val ( * ) : int -> t -> t
 val ( *+ ) : t -> t -> int
 
+val dist : t -> t -> int
 val angle : t -> float
-
 val unitize : t -> t
 
 module O : sig
+  val zero : t
+  val xhat : t
+  val yhat : t
   val (+) : t -> t -> t
   val (-) : t -> t -> t
   val (~-) : t -> t

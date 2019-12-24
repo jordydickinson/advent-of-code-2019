@@ -9,7 +9,7 @@ module T = struct
 end
 
 include T
-include Comparable.Make (T)
+include Comparable.Make(T)
 
 let make x y =
   { x = x
@@ -18,7 +18,7 @@ let make x y =
 
 let zero = make 0 0
 let xhat = make 1 0
-let yhat = make 1 1
+let yhat = make 0 1
 
 let map v ~f =
   { x = f v.x
@@ -40,11 +40,17 @@ let sub u v = map2 u v (-)
 let smul x v = map v (( * ) x)
 let dot u v = map2 u v ( * ) |> fold' ~f:(+)
 
-let (~-) = neg
-let (+) = add
-let (-) = sub
-let ( * ) = smul
-let ( *+ ) = dot
+module Infix = struct
+  let (~-) = neg
+  let (+) = add
+  let (-) = sub
+  let ( * ) = smul
+  let ( *+ ) = dot
+end
+
+include Infix
+
+let dist u v = norm (u - v)
 
 let angle v =
   Float.(atan2 (of_int v.x) (of_int v.y))
@@ -54,9 +60,8 @@ let unitize v =
   map v (fun vi -> vi/d)
 
 module O = struct
-  let (~-) = (~-)
-  let (+) = (+)
-  let (-) = (-)
-  let ( * ) = ( * )
-  let ( *+ ) = ( *+ )
+  include Infix
+  let zero = zero
+  let xhat = xhat
+  let yhat = yhat
 end
