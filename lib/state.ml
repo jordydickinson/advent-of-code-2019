@@ -14,3 +14,4 @@ type ('a, 's) t = ('a, 's) X.t
 let get = fun s -> (s, s)
 let set s = fun _ -> ((), s)
 let run m s = m s
+let eval m s = fst @@ run m s
