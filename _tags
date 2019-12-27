@@ -1,5 +1,6 @@
 true:   package(core)
 true:   package(ppx_jane)
 true:   package(topological_sort)
+true:   package(bignum)
 true:   bin_annot
 true:   thread
